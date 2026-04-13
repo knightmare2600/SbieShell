@@ -5,13 +5,8 @@ on:
 
 jobs:
   build:
-    name: Build (${{ matrix.arch }})
+    name: Build (x64)
     runs-on: windows-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [x64, ARM64]
 
     env:
       SOLUTION: WinXShell_VS2015.sln
@@ -30,21 +25,20 @@ jobs:
         run: nuget restore "${env:SOLUTION}"
 
       - name: Build solution
-        run: |
-          msbuild "${env:SOLUTION}" /p:Configuration=Release /p:Platform=${{ matrix.arch }} /m
+        run: >
+          msbuild "${env:SOLUTION}" /p:Configuration=Release /p:Platform=x64 /p:WindowsTargetPlatformVersion=10.0 /m
 
       - name: Collect binaries
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Path output -Force | Out-Null
 
-          # Adjust if needed, but this is safer than blind recursion
           Get-ChildItem -Recurse -Include *.exe,*.dll |
-            Where-Object { $_.FullName -match "\\Release\\" -and $_.FullName -match "${{ matrix.arch }}" } |
+            Where-Object { $_.FullName -match "\\Release\\" } |
             Copy-Item -Destination output -Force
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SbieShell-${{ matrix.arch }}
+          name: SbieShell-x64
           path: output
