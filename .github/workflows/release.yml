@@ -13,6 +13,9 @@ jobs:
       matrix:
         arch: [x64, ARM64]
 
+    env:
+      SOLUTION: WinXShell_VS2015.sln
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -24,11 +27,11 @@ jobs:
         uses: NuGet/setup-nuget@v2
 
       - name: Restore NuGet packages
-        run: nuget restore
+        run: nuget restore "${env:SOLUTION}"
 
       - name: Build solution
         run: |
-          msbuild *.sln ^
+          msbuild "${env:SOLUTION}" ^
             /p:Configuration=Release ^
             /p:Platform=${{ matrix.arch }} ^
             /m
@@ -38,9 +41,9 @@ jobs:
         run: |
           New-Item -ItemType Directory -Path output -Force | Out-Null
 
-          # Adjust this if your output path differs
-          Get-ChildItem -Recurse -Include *.exe,*.dll -Path .\ -ErrorAction SilentlyContinue |
-            Where-Object { $_.FullName -match "Release" } |
+          # Adjust if needed, but this is safer than blind recursion
+          Get-ChildItem -Recurse -Include *.exe,*.dll |
+            Where-Object { $_.FullName -match "\\Release\\" -and $_.FullName -match "${{ matrix.arch }}" } |
             Copy-Item -Destination output -Force
 
       - name: Upload artifact
