@@ -1,0 +1,50 @@
+name: Build (Manual)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build (${{ matrix.arch }})
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, ARM64]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Restore NuGet packages
+        run: nuget restore
+
+      - name: Build solution
+        run: |
+          msbuild *.sln ^
+            /p:Configuration=Release ^
+            /p:Platform=${{ matrix.arch }} ^
+            /m
+
+      - name: Collect binaries
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path output -Force | Out-Null
+
+          # Adjust this if your output path differs
+          Get-ChildItem -Recurse -Include *.exe,*.dll -Path .\ -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -match "Release" } |
+            Copy-Item -Destination output -Force
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SbieShell-${{ matrix.arch }}
+          path: output
