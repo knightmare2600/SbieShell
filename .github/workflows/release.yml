@@ -26,7 +26,9 @@ jobs:
 
       - name: Build solution
         run: >
-          msbuild "${env:SOLUTION}" /p:Configuration=Release /p:Platform=x64 /p:WindowsTargetPlatformVersion=10.0 /m
+          - name: Build solution
+  run: >
+    msbuild "${env:SOLUTION}" /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m
 
       - name: Collect binaries
         shell: pwsh
