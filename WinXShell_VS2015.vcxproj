@@ -89,6 +89,51 @@
     <OutDir>$(SolutionDir)$(PlatformName)\$(Configuration)\</OutDir>
     <IntDir>$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
+<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+  <Midl>
+    <TypeLibraryName>$(OutDir)$(TargetName).tlb</TypeLibraryName>
+    <HeaderFileName />
+  </Midl>
+
+  <ClCompile>
+    <Optimization>MinSpace</Optimization>
+    <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+    <PreprocessorDefinitions>
+      _NO_ALPHABLEND;NDEBUG;WIN32;_WIN32_IE=0x0700;_WIN32_WINNT=0x0A00;
+      %(PreprocessorDefinitions)
+    </PreprocessorDefinitions>
+
+    <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    <FunctionLevelLinking>true</FunctionLevelLinking>
+    <RuntimeTypeInfo>true</RuntimeTypeInfo>
+    <PrecompiledHeader>Use</PrecompiledHeader>
+    <PrecompiledHeaderFile>precomp.h</PrecompiledHeaderFile>
+    <WarningLevel>Level3</WarningLevel>
+    <DebugInformationFormat>None</DebugInformationFormat>
+  </ClCompile>
+
+  <ResourceCompile>
+    <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    <Culture>0x0409</Culture>
+  </ResourceCompile>
+
+  <Link>
+    <AdditionalDependencies>
+      shell32.lib;advapi32.lib;gdi32.lib;user32.lib;
+      comctl32.lib;shlwapi.lib;UxTheme.lib;%(AdditionalDependencies)
+    </AdditionalDependencies>
+
+    <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+    <SubSystem>Windows</SubSystem>
+
+    <!-- CRITICAL FIX -->
+    <TargetMachine>MachineARM64</TargetMachine>
+  </Link>
+
+  <Manifest>
+    <AdditionalManifestFiles>WinXShell.exe.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+  </Manifest>
+</ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
       <TypeLibraryName>$(OutDir)$(TargetName).tlb</TypeLibraryName>
