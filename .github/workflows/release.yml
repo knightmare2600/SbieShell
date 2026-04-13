@@ -3,14 +3,14 @@ name: Build (Manual)
 on:
   workflow_dispatch:
 
-strategy:
-  matrix:
-    arch: [x64, ARM64]
-
 jobs:
   build:
-    name: Build (x64)
+    name: Build (${{ matrix.arch }})
     runs-on: windows-latest
+
+    strategy:
+      matrix:
+        arch: [x64, ARM64]
 
     env:
       SOLUTION: WinXShell_VS2015.sln
@@ -29,12 +29,19 @@ jobs:
         run: nuget restore "${env:SOLUTION}"
 
       - name: Build solution
-        run: msbuild "${env:SOLUTION}" /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m
+        run: >
+          msbuild "${env:SOLUTION}"
+          /p:Configuration=Release
+          /p:Platform=${{ matrix.arch }}
+          /p:PlatformToolset=v143
+          /p:WindowsTargetPlatformVersion=10.0
+          /m
 
       - name: Collect binaries
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Path output -Force | Out-Null
+
           Get-ChildItem -Recurse -Include *.exe,*.dll |
             Where-Object { $_.FullName -match "\\Release\\" } |
             Copy-Item -Destination output -Force
@@ -42,5 +49,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SbieShell-x64
+          name: SbieShell-${{ matrix.arch }}
           path: output
