@@ -3,6 +3,10 @@ name: Build (Manual)
 on:
   workflow_dispatch:
 
+strategy:
+  matrix:
+    arch: [x64, ARM64]
+
 jobs:
   build:
     name: Build (x64)
